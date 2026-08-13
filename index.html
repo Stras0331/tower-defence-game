@@ -2,39 +2,46 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>极简塔防 - 手机版</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>极简塔防</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            touch-action: manipulation;
             -webkit-touch-callout: none;
             -webkit-user-select: none;
-            -webkit-tap-highlight-color: transparent;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
             user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: fixed;
+            touch-action: manipulation;
+            background: #1a1a2e;
         }
         
         body {
-            background: #1a1a2e;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-            overflow: hidden;
             margin: 0;
             padding: 0;
-            position: fixed;
-            width: 100%;
-            height: 100%;
         }
         
         #game-container {
             position: relative;
-            width: 100vw;
-            height: 100vh;
+            width: 100%;
+            height: 100%;
             max-width: 500px;
             background: #16213e;
             overflow: hidden;
@@ -42,114 +49,86 @@
             flex-direction: column;
         }
         
-        canvas {
-            display: block;
-            flex: 1;
-            width: 100%;
-            background: #0f3460;
-            touch-action: none;
-        }
-        
-        /* 顶部信息栏 */
         #info-bar {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: #fff;
-            padding: 12px 15px;
+            padding: 8px 10px;
             display: flex;
-            justify-content: space-between;
+            justify-content: space-around;
             align-items: center;
-            font-size: 15px;
+            font-size: 13px;
             z-index: 10;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-            min-height: 50px;
+            min-height: 40px;
+            flex-shrink: 0;
             pointer-events: none;
         }
         
         .info-item {
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 3px;
             font-weight: bold;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
         }
         
-        .info-icon {
-            font-size: 18px;
+        #canvas-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            min-height: 0;
+            background: #0f3460;
         }
         
-        /* 底部按钮区域 */
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+            cursor: pointer;
+        }
+        
         #ui-overlay {
             background: rgba(22, 33, 62, 0.95);
-            padding: 10px;
+            padding: 6px;
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 4px;
             justify-content: center;
             z-index: 10;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
-            min-height: 80px;
-            backdrop-filter: blur(10px);
+            min-height: 70px;
+            flex-shrink: 0;
+            overflow-y: auto;
+            max-height: 35vh;
         }
         
-        /* 塔台按钮 */
         .tower-btn {
-            padding: 10px 6px;
+            padding: 6px 4px;
             border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 12px;
+            border-radius: 8px;
             color: #fff;
-            font-size: 12px;
+            font-size: 10px;
             cursor: pointer;
             text-align: center;
-            min-width: 52px;
-            min-height: 52px;
+            min-width: 48px;
+            min-height: 48px;
             flex: 1;
-            max-width: 65px;
-            transition: all 0.2s ease;
+            max-width: 60px;
+            transition: all 0.15s ease;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 2px;
+            gap: 1px;
             position: relative;
-            overflow: hidden;
-        }
-        
-        .tower-btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.3);
-            transform: translate(-50%, -50%);
-            transition: width 0.3s, height 0.3s;
-        }
-        
-        .tower-btn:active::before {
-            width: 200px;
-            height: 200px;
         }
         
         .tower-btn:active {
-            transform: scale(0.92);
+            transform: scale(0.9);
         }
         
         .tower-btn.selected {
             border-color: #ffd700;
-            background-color: rgba(255, 215, 0, 0.2);
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
-            animation: pulse 1.5s ease-in-out infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% {
-                box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-            }
-            50% {
-                box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
-            }
+            background-color: rgba(255, 215, 0, 0.3);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
         }
         
         .tower-icon {
@@ -158,43 +137,40 @@
         }
         
         .tower-name {
-            font-size: 11px;
+            font-size: 9px;
             font-weight: bold;
             line-height: 1;
         }
         
         .tower-cost {
-            font-size: 10px;
+            font-size: 8px;
             color: #ffd700;
             line-height: 1;
         }
         
-        /* 操作按钮 */
         .action-btn {
-            padding: 10px 8px;
+            padding: 6px 4px;
             border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 12px;
+            border-radius: 8px;
             color: #fff;
-            font-size: 12px;
+            font-size: 10px;
             font-weight: bold;
             cursor: pointer;
             text-align: center;
-            min-width: 60px;
-            min-height: 52px;
+            min-width: 48px;
+            min-height: 48px;
             flex: 1;
-            max-width: 75px;
-            transition: all 0.2s ease;
+            max-width: 60px;
+            transition: all 0.15s ease;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 2px;
-            position: relative;
-            overflow: hidden;
+            gap: 1px;
         }
         
         .action-btn:active {
-            transform: scale(0.92);
+            transform: scale(0.9);
         }
         
         .action-icon {
@@ -203,11 +179,10 @@
         }
         
         .action-text {
-            font-size: 11px;
+            font-size: 9px;
             line-height: 1;
         }
         
-        /* 弹窗遮罩 */
         #message-overlay {
             position: absolute;
             top: 0;
@@ -220,7 +195,6 @@
             align-items: center;
             z-index: 100;
             flex-direction: column;
-            backdrop-filter: blur(5px);
         }
         
         #message-overlay.active {
@@ -229,56 +203,44 @@
         
         #message-content {
             background: #fff;
-            border-radius: 20px;
-            padding: 25px;
+            border-radius: 15px;
+            padding: 20px;
             max-width: 85%;
-            width: 300px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-            animation: slideUp 0.3s ease;
-        }
-        
-        @keyframes slideUp {
-            from {
-                transform: translateY(50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
+            width: 280px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
         
         #message-text {
             color: #333;
-            font-size: 20px;
+            font-size: 16px;
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             font-weight: bold;
+            white-space: pre-line;
         }
         
         #message-buttons {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
         }
         
         .message-btn {
-            padding: 12px 20px;
+            padding: 12px 15px;
             background: #667eea;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             color: #fff;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: bold;
             cursor: pointer;
             text-align: center;
-            transition: all 0.2s ease;
             min-height: 44px;
+            width: 100%;
         }
         
         .message-btn:active {
             transform: scale(0.95);
-            background: #5a6fd8;
         }
         
         .message-btn.secondary {
@@ -293,7 +255,6 @@
             background: #27ae60;
         }
         
-        /* Toast提示 */
         #toast {
             position: absolute;
             top: 50%;
@@ -301,64 +262,38 @@
             transform: translate(-50%, -50%);
             background: rgba(0, 0, 0, 0.85);
             color: #fff;
-            padding: 15px 25px;
-            border-radius: 10px;
-            font-size: 16px;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
             font-weight: bold;
             z-index: 200;
             pointer-events: none;
             opacity: 0;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.3s;
             text-align: center;
             max-width: 80%;
         }
         
         #toast.show {
             opacity: 1;
-            animation: toastIn 0.3s ease;
-        }
-        
-        @keyframes toastIn {
-            from {
-                transform: translate(-50%, -50%) scale(0.8);
-                opacity: 0;
-            }
-            to {
-                transform: translate(-50%, -50%) scale(1);
-                opacity: 1;
-            }
         }
     </style>
 </head>
 <body>
     <div id="game-container">
-        <!-- 顶部信息栏 -->
         <div id="info-bar">
-            <div class="info-item">
-                <span class="info-icon">💰</span>
-                <span id="gold">200</span>
-            </div>
-            <div class="info-item">
-                <span class="info-icon">🌊</span>
-                <span id="wave">0/12</span>
-            </div>
-            <div class="info-item">
-                <span class="info-icon">❤️</span>
-                <span id="core-hp">1000</span>
-            </div>
-            <div class="info-item">
-                <span class="info-icon">⏱️</span>
-                <span id="prep-time">准备</span>
-            </div>
+            <div class="info-item">💰<span id="gold">200</span></div>
+            <div class="info-item">🌊<span id="wave">0/12</span></div>
+            <div class="info-item">❤️<span id="core-hp">1000</span></div>
+            <div class="info-item">⏱️<span id="prep-time">待开始</span></div>
         </div>
         
-        <!-- 游戏画布 -->
-        <canvas id="gameCanvas"></canvas>
+        <div id="canvas-container">
+            <canvas id="gameCanvas"></canvas>
+        </div>
         
-        <!-- 底部操作栏 -->
         <div id="ui-overlay"></div>
         
-        <!-- 弹窗 -->
         <div id="message-overlay">
             <div id="message-content">
                 <div id="message-text"></div>
@@ -366,106 +301,65 @@
             </div>
         </div>
         
-        <!-- Toast提示 -->
         <div id="toast"></div>
     </div>
     
     <script>
+        console.log('游戏启动中...');
+        
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
-        // 游戏配置
         let GRID_SIZE, COLS, ROWS, offsetX, offsetY;
         
         function setupCanvas() {
-            const container = document.getElementById('game-container');
+            const container = document.getElementById('canvas-container');
             const containerWidth = container.clientWidth;
-            
-            // 计算可用高度
-            const infoBarHeight = document.getElementById('info-bar').offsetHeight;
-            const uiOverlayHeight = document.getElementById('ui-overlay').offsetHeight;
-            const availableHeight = container.clientHeight - infoBarHeight - uiOverlayHeight;
+            const containerHeight = container.clientHeight;
             
             canvas.width = containerWidth;
-            canvas.height = availableHeight;
-            canvas.style.height = availableHeight + 'px';
+            canvas.height = containerHeight;
+            canvas.style.width = containerWidth + 'px';
+            canvas.style.height = containerHeight + 'px';
             
-            // 计算网格
             COLS = 10;
             ROWS = 13;
+            
             GRID_SIZE = Math.floor(Math.min(
-                (containerWidth - 10) / COLS,
-                (availableHeight - 10) / ROWS
+                (containerWidth - 4) / COLS,
+                (containerHeight - 4) / ROWS
             ));
             
-            // 居中游戏区域
+            GRID_SIZE = Math.max(GRID_SIZE, 20);
+            
             offsetX = (containerWidth - COLS * GRID_SIZE) / 2;
-            offsetY = (availableHeight - ROWS * GRID_SIZE) / 2;
+            offsetY = (containerHeight - ROWS * GRID_SIZE) / 2;
         }
         
-        setupCanvas();
-        window.addEventListener('resize', () => {
-            setTimeout(setupCanvas, 100);
-        });
-        window.addEventListener('orientationchange', () => {
-            setTimeout(setupCanvas, 200);
-        });
-        
-        // 塔台配置
         const TOWER_TYPES = {
-            CANNON: { 
-                name: '炮塔', cost: 100, color: '#3498db', 
-                icon: '🔫', attack: 20, speed: 1, range: 3, type: 'attack' 
-            },
-            SOLAR: { 
-                name: '太阳能', cost: 50, color: '#f1c40f', 
-                icon: '☀️', productionRate: 10, productionSpeed: 2, type: 'production' 
-            },
-            SWORD: { 
-                name: '剑士', cost: 80, color: '#e74c3c', 
-                icon: '⚔️', attack: 35, speed: 1.5, range: 1.5, type: 'melee' 
-            },
-            WALL: { 
-                name: '城墙', cost: 40, color: '#95a5a6', 
-                icon: '🧱', hp: 300, defense: 30, type: 'defense' 
-            },
-            ICE: { 
-                name: '冰冻', cost: 120, color: '#1abc9c', 
-                icon: '❄️', attack: 10, speed: 0.8, range: 2.5, slowEffect: 0.5, type: 'slow' 
-            },
-            SNIPER: { 
-                name: '狙击', cost: 150, color: '#9b59b6', 
-                icon: '🎯', attack: 50, speed: 0.5, range: 5, type: 'sniper' 
-            }
+            CANNON: { name: '炮塔', cost: 100, color: '#3498db', icon: '🔫', attack: 20, speed: 1, range: 3 },
+            SOLAR: { name: '太阳能', cost: 50, color: '#f1c40f', icon: '☀️', productionRate: 10, productionSpeed: 2 },
+            SWORD: { name: '剑士', cost: 80, color: '#e74c3c', icon: '⚔️', attack: 35, speed: 1.5, range: 1.5 },
+            WALL: { name: '城墙', cost: 40, color: '#95a5a6', icon: '🧱', hp: 300, defense: 30 },
+            ICE: { name: '冰冻', cost: 120, color: '#1abc9c', icon: '❄️', attack: 10, speed: 0.8, range: 2.5, slowEffect: 0.5 },
+            SNIPER: { name: '狙击', cost: 150, color: '#9b59b6', icon: '🎯', attack: 50, speed: 0.5, range: 5 }
         };
         
-        // 敌人配置
         const ENEMY_TYPES = {
-            INFANTRY: { name: '步兵', hp: 50, speed: 1, reward: 20, color: '#2ecc71', size: 8, attack: 10 },
-            RUNNER: { name: '快速兵', hp: 30, speed: 2, reward: 25, color: '#3498db', size: 6, attack: 5 },
-            TANK: { name: '重装兵', hp: 150, speed: 0.5, reward: 40, color: '#7f8c8d', size: 12, attack: 15 },
-            ELITE_WARRIOR: { name: '精英战士', hp: 200, speed: 1.2, reward: 80, color: '#e67e22', size: 10, attack: 20 },
-            ELITE_TANK: { name: '精英坦克', hp: 400, speed: 0.4, reward: 100, color: '#8e44ad', size: 15, attack: 30 },
-            BOSS: { name: 'Boss', hp: 2000, speed: 0.3, reward: 1000, color: '#c0392b', size: 25, attack: 100 }
+            INFANTRY: { hp: 50, speed: 1, reward: 20, color: '#2ecc71', size: 8, attack: 10 },
+            RUNNER: { hp: 30, speed: 2, reward: 25, color: '#3498db', size: 6, attack: 5 },
+            TANK: { hp: 150, speed: 0.5, reward: 40, color: '#7f8c8d', size: 12, attack: 15 },
+            ELITE_WARRIOR: { hp: 200, speed: 1.2, reward: 80, color: '#e67e22', size: 10, attack: 20 },
+            ELITE_TANK: { hp: 400, speed: 0.4, reward: 100, color: '#8e44ad', size: 15, attack: 30 },
+            BOSS: { hp: 2000, speed: 0.3, reward: 1000, color: '#c0392b', size: 25, attack: 100 }
         };
         
-        // 路径定义
         const path = [
-            {x: 0, y: 1},
-            {x: 2, y: 1},
-            {x: 2, y: 3},
-            {x: 4, y: 3},
-            {x: 4, y: 1},
-            {x: 6, y: 1},
-            {x: 6, y: 5},
-            {x: 3, y: 5},
-            {x: 3, y: 8},
-            {x: 5, y: 8},
-            {x: 5, y: 11},
-            {x: 5, y: 12}
+            {x: 0, y: 1}, {x: 2, y: 1}, {x: 2, y: 3}, {x: 4, y: 3},
+            {x: 4, y: 1}, {x: 6, y: 1}, {x: 6, y: 5}, {x: 3, y: 5},
+            {x: 3, y: 8}, {x: 5, y: 8}, {x: 5, y: 11}, {x: 5, y: 12}
         ];
         
-        // 游戏状态
         let gameState = {
             gold: 200,
             coreHp: 1000,
@@ -474,6 +368,7 @@
             maxWave: 12,
             preparationTime: 30,
             waveActive: false,
+            gameStarted: false,
             enemies: [],
             towers: [],
             selectedTowerType: null,
@@ -485,19 +380,6 @@
             enemiesPerWave: 0
         };
         
-        // Toast提示函数
-        function showToast(message, duration = 1500) {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.classList.add('show');
-            
-            clearTimeout(toast.timeout);
-            toast.timeout = setTimeout(() => {
-                toast.classList.remove('show');
-            }, duration);
-        }
-        
-        // 塔台类
         class Tower {
             constructor(type, gridX, gridY) {
                 this.type = type;
@@ -550,7 +432,6 @@
             }
         }
         
-        // 敌人类
         class Enemy {
             constructor(type, wave) {
                 this.type = type;
@@ -639,12 +520,21 @@
             }
         }
         
-        // 初始化UI
+        function showToast(message, duration = 1500) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            
+            clearTimeout(toast.timeout);
+            toast.timeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, duration);
+        }
+        
         function initUI() {
             const uiOverlay = document.getElementById('ui-overlay');
             uiOverlay.innerHTML = '';
             
-            // 塔台按钮
             for (const [type, config] of Object.entries(TOWER_TYPES)) {
                 const btn = document.createElement('div');
                 btn.className = 'tower-btn';
@@ -658,44 +548,32 @@
                 uiOverlay.appendChild(btn);
             }
             
-            // 分隔线
             const divider = document.createElement('div');
             divider.style.width = '100%';
             divider.style.height = '1px';
             divider.style.backgroundColor = 'rgba(255,255,255,0.2)';
-            divider.style.margin = '2px 0';
             uiOverlay.appendChild(divider);
             
-            // 商店按钮
             const shopBtn = document.createElement('div');
             shopBtn.className = 'action-btn';
             shopBtn.style.backgroundColor = '#e67e22';
-            shopBtn.innerHTML = `
-                <span class="action-icon">🛒</span>
-                <span class="action-text">商店</span>
-            `;
+            shopBtn.innerHTML = '<span class="action-icon">🛒</span><span class="action-text">商店</span>';
             shopBtn.onclick = openShop;
             uiOverlay.appendChild(shopBtn);
             
-            // 开始按钮
             const startBtn = document.createElement('div');
             startBtn.className = 'action-btn';
             startBtn.style.backgroundColor = '#27ae60';
-            startBtn.innerHTML = `
-                <span class="action-icon">▶️</span>
-                <span class="action-text">开始</span>
-            `;
+            startBtn.style.minWidth = '70px';
+            startBtn.style.maxWidth = '80px';
+            startBtn.innerHTML = '<span class="action-icon">▶️</span><span class="action-text">开始</span>';
             startBtn.onclick = startWave;
             uiOverlay.appendChild(startBtn);
             
-            // 重新开始按钮
             const restartBtn = document.createElement('div');
             restartBtn.className = 'action-btn';
             restartBtn.style.backgroundColor = '#c0392b';
-            restartBtn.innerHTML = `
-                <span class="action-icon">🔄</span>
-                <span class="action-text">重开</span>
-            `;
+            restartBtn.innerHTML = '<span class="action-icon">🔄</span><span class="action-text">重开</span>';
             restartBtn.onclick = restartGame;
             uiOverlay.appendChild(restartBtn);
         }
@@ -722,35 +600,18 @@
             buttons.innerHTML = '';
             
             const items = [
-                { 
-                    name: '💰 金币+100', 
-                    cost: 50, 
-                    btnClass: 'success',
-                    action: () => { 
-                        gameState.gold += 100; 
-                        showToast('获得100金币！');
-                    } 
-                },
-                { 
-                    name: '⚔️ 攻击+50%', 
-                    cost: 100, 
-                    btnClass: '',
-                    action: () => { 
-                        gameState.towers.forEach(t => { 
-                            if (t.attack) t.attack = Math.floor(t.attack * 1.5); 
-                        }); 
-                        showToast('攻击力提升50%！');
-                    } 
-                },
-                { 
-                    name: '❤️ 核心+300', 
-                    cost: 75, 
-                    btnClass: 'danger',
-                    action: () => { 
-                        gameState.coreHp = Math.min(gameState.coreMaxHp, gameState.coreHp + 300); 
-                        showToast('核心恢复300生命！');
-                    } 
-                }
+                { name: '💰 金币+100', cost: 50, btnClass: 'success', action: () => { 
+                    gameState.gold += 100; 
+                    showToast('获得100金币！');
+                }},
+                { name: '⚔️ 攻击+50%', cost: 100, btnClass: '', action: () => { 
+                    gameState.towers.forEach(t => { if (t.attack) t.attack = Math.floor(t.attack * 1.5); }); 
+                    showToast('攻击力提升50%！');
+                }},
+                { name: '❤️ 核心+300', cost: 75, btnClass: 'danger', action: () => { 
+                    gameState.coreHp = Math.min(gameState.coreMaxHp, gameState.coreHp + 300); 
+                    showToast('核心恢复300生命！');
+                }}
             ];
             
             items.forEach((item) => {
@@ -783,19 +644,15 @@
             document.getElementById('wave').textContent = `${gameState.wave}/${gameState.maxWave}`;
             document.getElementById('core-hp').textContent = Math.floor(gameState.coreHp);
             
-            // 更新准备时间显示
             const prepTimeEl = document.getElementById('prep-time');
-            if (!gameState.waveActive && !gameState.gameOver && !gameState.victory) {
-                if (gameState.wave === 0) {
-                    prepTimeEl.textContent = '准备';
-                } else {
-                    prepTimeEl.textContent = `${Math.ceil(gameState.preparationTime)}s`;
-                }
+            if (!gameState.gameStarted) {
+                prepTimeEl.textContent = '待开始';
+            } else if (!gameState.waveActive && !gameState.gameOver && !gameState.victory) {
+                prepTimeEl.textContent = `${Math.ceil(gameState.preparationTime)}s`;
             } else {
-                prepTimeEl.textContent = '战斗';
+                prepTimeEl.textContent = '战斗中';
             }
             
-            // 更新按钮选中状态
             const buttons = document.querySelectorAll('.tower-btn');
             buttons.forEach((btn, i) => {
                 const types = Object.keys(TOWER_TYPES);
@@ -808,7 +665,17 @@
         }
         
         function startWave() {
-            if (!gameState.waveActive && !gameState.gameOver && !gameState.victory) {
+            if (gameState.gameOver || gameState.victory) {
+                showToast('游戏已结束，请重新开始');
+                return;
+            }
+            
+            if (!gameState.waveActive) {
+                if (!gameState.gameStarted) {
+                    gameState.gameStarted = true;
+                    showToast('🎮 游戏开始！');
+                }
+                
                 gameState.wave++;
                 gameState.waveActive = true;
                 gameState.enemies = [];
@@ -823,6 +690,8 @@
                     showToast(`第${gameState.wave}波开始！`);
                 }
                 updateUI();
+            } else {
+                showToast('当前波次进行中！');
             }
         }
         
@@ -855,8 +724,12 @@
         function updateGame() {
             if (gameState.gameOver || gameState.victory) return;
             
+            if (!gameState.gameStarted) {
+                return;
+            }
+            
             if (!gameState.waveActive) {
-                if (gameState.preparationTime > 0 && gameState.wave > 0) {
+                if (gameState.preparationTime > 0) {
                     gameState.preparationTime -= 1/60;
                     if (gameState.preparationTime <= 0) {
                         startWave();
@@ -903,7 +776,7 @@
                         gameState.victory = true;
                         showVictory();
                     } else {
-                        showToast(`第${gameState.wave}波完成！`);
+                        showToast(`第${gameState.wave}波完成！准备下一波`);
                     }
                 }
             }
@@ -955,7 +828,7 @@
             const buttons = document.getElementById('message-buttons');
             
             overlay.classList.add('active');
-            text.textContent = '💀 游戏失败！';
+            text.textContent = '💀 游戏失败！\n核心被摧毁了';
             buttons.innerHTML = '';
             
             const restartBtn = document.createElement('button');
@@ -971,7 +844,7 @@
             const buttons = document.getElementById('message-buttons');
             
             overlay.classList.add('active');
-            text.textContent = '🎉 胜利！击败了Boss！';
+            text.textContent = '🎉 胜利！\n成功击败了Boss！';
             buttons.innerHTML = '';
             
             const restartBtn = document.createElement('button');
@@ -990,6 +863,7 @@
                 maxWave: 12,
                 preparationTime: 30,
                 waveActive: false,
+                gameStarted: false,
                 enemies: [],
                 towers: [],
                 selectedTowerType: null,
@@ -1005,19 +879,15 @@
             updateUI();
         }
         
-        // 绘制函数
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // 绘制背景
             ctx.fillStyle = '#0f3460';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // 绘制游戏区域
             ctx.fillStyle = '#ecf0f1';
             ctx.fillRect(offsetX, offsetY, COLS * GRID_SIZE, ROWS * GRID_SIZE);
             
-            // 绘制网格
             ctx.strokeStyle = '#bdc3c7';
             ctx.lineWidth = 1;
             for (let i = 0; i <= COLS; i++) {
@@ -1033,7 +903,6 @@
                 ctx.stroke();
             }
             
-            // 绘制路径
             ctx.strokeStyle = '#8B4513';
             ctx.lineWidth = Math.max(5, GRID_SIZE * 0.3);
             ctx.lineCap = 'round';
@@ -1047,11 +916,9 @@
             }
             ctx.stroke();
             
-            // 绘制核心
             const coreX = offsetX + 5 * GRID_SIZE + GRID_SIZE/2;
             const coreY = offsetY + 12 * GRID_SIZE + GRID_SIZE/2;
             
-            // 核心光环
             const gradient = ctx.createRadialGradient(coreX, coreY, 0, coreX, coreY, GRID_SIZE);
             gradient.addColorStop(0, 'rgba(231, 76, 60, 0.5)');
             gradient.addColorStop(1, 'rgba(231, 76, 60, 0)');
@@ -1060,257 +927,36 @@
             ctx.arc(coreX, coreY, GRID_SIZE, 0, Math.PI * 2);
             ctx.fill();
             
-            // 核心本体
             ctx.fillStyle = '#e74c3c';
             ctx.beginPath();
             ctx.arc(coreX, coreY, GRID_SIZE * 0.4, 0, Math.PI * 2);
             ctx.fill();
             
-            // 核心图标
             ctx.font = `${GRID_SIZE * 0.5}px Arial`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText('🏰', coreX, coreY);
             
-            // 绘制塔台
             for (const tower of gameState.towers) {
                 const x = offsetX + tower.gridX * GRID_SIZE;
                 const y = offsetY + tower.gridY * GRID_SIZE;
                 const config = TOWER_TYPES[tower.type];
                 
-                // 塔台背景
                 ctx.fillStyle = config.color;
                 ctx.fillRect(x + 2, y + 2, GRID_SIZE - 4, GRID_SIZE - 4);
                 
-                // 塔台边框
                 ctx.strokeStyle = '#2c3e50';
                 ctx.lineWidth = 2;
                 ctx.strokeRect(x + 2, y + 2, GRID_SIZE - 4, GRID_SIZE - 4);
                 
-                // 塔台图标
                 ctx.font = `${GRID_SIZE * 0.5}px Arial`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
                 ctx.fillText(config.icon, x + GRID_SIZE/2, y + GRID_SIZE/2 - 2);
                 
-                // 等级标记
                 if (tower.level > 1) {
                     ctx.fillStyle = '#ffd700';
                     ctx.font = `bold ${GRID_SIZE * 0.25}px Arial`;
                     ctx.fillText(`L${tower.level}`, x + GRID_SIZE/2, y + GRID_SIZE - 8);
                 }
                 
-                // 血条
                 if (tower.hp < tower.maxHp) {
-                    const hpRatio = tower.hp / tower.maxHp;
-                    ctx.fillStyle = 'rgba(0,0,0,0.5)';
-                    ctx.fillRect(x + 2, y - 6, GRID_SIZE - 4, 4);
-                    ctx.fillStyle = hpRatio > 0.5 ? '#2ecc71' : hpRatio > 0.25 ? '#f39c12' : '#e74c3c';
-                    ctx.fillRect(x + 2, y - 6, (GRID_SIZE - 4) * hpRatio, 4);
-                }
-            }
-            
-            // 绘制敌人
-            for (const enemy of gameState.enemies) {
-                const drawX = offsetX + enemy.x;
-                const drawY = offsetY + enemy.y;
-                
-                // 敌人阴影
-                ctx.fillStyle = 'rgba(0,0,0,0.3)';
-                ctx.beginPath();
-                ctx.arc(drawX + 2, drawY + 2, enemy.size, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // 敌人身体
-                ctx.fillStyle = enemy.color;
-                ctx.beginPath();
-                ctx.arc(drawX, drawY, enemy.size, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // 敌人边框
-                ctx.strokeStyle = '#2c3e50';
-                ctx.lineWidth = 1;
-                ctx.stroke();
-                
-                // 血条
-                const hpRatio = Math.max(0, enemy.hp / enemy.maxHp);
-                const barWidth = Math.max(20, enemy.size * 2);
-                const barHeight = 4;
-                const barX = drawX - barWidth/2;
-                const barY = drawY - enemy.size - 8;
-                
-                ctx.fillStyle = 'rgba(0,0,0,0.5)';
-                ctx.fillRect(barX, barY, barWidth, barHeight);
-                ctx.fillStyle = hpRatio > 0.5 ? '#2ecc71' : hpRatio > 0.25 ? '#f39c12' : '#e74c3c';
-                ctx.fillRect(barX, barY, barWidth * hpRatio, barHeight);
-            }
-            
-            // 绘制准备时间覆盖层
-            if (!gameState.waveActive && !gameState.gameOver && !gameState.victory) {
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-                const overlayY = offsetY + ROWS * GRID_SIZE / 2 - 40;
-                ctx.fillRect(offsetX + 10, overlayY, COLS * GRID_SIZE - 20, 80);
-                
-                ctx.fillStyle = '#fff';
-                ctx.font = `bold ${GRID_SIZE * 0.4}px Arial`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                
-                let timeText;
-                if (gameState.wave === 0) {
-                    timeText = '👆 选择塔台建造\n然后点击"开始"按钮';
-                } else {
-                    timeText = `⏱️ 准备时间: ${Math.ceil(gameState.preparationTime)}秒`;
-                }
-                
-                // 支持多行文本
-                const lines = timeText.split('\n');
-                lines.forEach((line, i) => {
-                    ctx.fillText(line, offsetX + COLS * GRID_SIZE / 2, 
-                               overlayY + 40 + (i - (lines.length-1)/2) * 25);
-                });
-            }
-            
-            updateUI();
-        }
-        
-        // 触摸处理
-        canvas.addEventListener('click', handleCanvasClick);
-        canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
-        
-        function handleTouchStart(e) {
-            e.preventDefault();
-            const touch = e.touches[0];
-            const clickEvent = new MouseEvent('click', {
-                clientX: touch.clientX,
-                clientY: touch.clientY
-            });
-            canvas.dispatchEvent(clickEvent);
-        }
-        
-        function handleCanvasClick(e) {
-            if (gameState.gameOver || gameState.victory) return;
-            
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            
-            const x = (e.clientX - rect.left) * scaleX;
-            const y = (e.clientY - rect.top) * scaleY;
-            
-            if (x >= offsetX && x <= offsetX + COLS * GRID_SIZE &&
-                y >= offsetY && y <= offsetY + ROWS * GRID_SIZE) {
-                
-                const gridX = Math.floor((x - offsetX) / GRID_SIZE);
-                const gridY = Math.floor((y - offsetY) / GRID_SIZE);
-                
-                // 检查是否点击了已有塔台
-                let clickedTower = null;
-                for (const tower of gameState.towers) {
-                    if (tower.gridX === gridX && tower.gridY === gridY) {
-                        clickedTower = tower;
-                        break;
-                    }
-                }
-                
-                if (clickedTower) {
-                    handleTowerClick(clickedTower);
-                } else if (gameState.selectedTowerType) {
-                    placeTower(gridX, gridY);
-                }
-            }
-        }
-        
-        function handleTowerClick(tower) {
-            const config = TOWER_TYPES[tower.type];
-            
-            if (tower.level < 3) {
-                const upgradeCost = config.cost * tower.level;
-                
-                // 显示升级确认
-                const overlay = document.getElementById('message-overlay');
-                const text = document.getElementById('message-text');
-                const buttons = document.getElementById('message-buttons');
-                
-                overlay.classList.add('active');
-                text.textContent = `${config.icon} ${config.name}\n等级: ${tower.level}\n升级费用: ${upgradeCost}金币`;
-                buttons.innerHTML = '';
-                
-                const upgradeBtn = document.createElement('button');
-                upgradeBtn.className = 'message-btn';
-                upgradeBtn.textContent = '⬆️ 升级';
-                upgradeBtn.onclick = () => {
-                    if (gameState.gold >= upgradeCost) {
-                        gameState.gold -= upgradeCost;
-                        tower.upgrade();
-                        showToast(`升级成功！等级${tower.level}`);
-                        overlay.classList.remove('active');
-                        updateUI();
-                    } else {
-                        showToast('金币不足！');
-                    }
-                };
-                buttons.appendChild(upgradeBtn);
-                
-                const closeBtn = document.createElement('button');
-                closeBtn.className = 'message-btn secondary';
-                closeBtn.textContent = '关闭';
-                closeBtn.onclick = () => {
-                    overlay.classList.remove('active');
-                };
-                buttons.appendChild(closeBtn);
-            } else {
-                showToast('已达到最高等级！');
-            }
-        }
-        
-        function placeTower(gridX, gridY) {
-            const config = TOWER_TYPES[gameState.selectedTowerType];
-            
-            if (gameState.gold < config.cost) {
-                showToast(`金币不足！需要${config.cost}金币`);
-                return;
-            }
-            
-            // 检查是否在路径上
-            const onPath = path.some(p => p.x === gridX && p.y === gridY);
-            if (onPath) {
-                showToast('不能在路径上建造！');
-                return;
-            }
-            
-            // 检查是否已有塔台
-            const hasTower = gameState.towers.some(t => t.gridX === gridX && t.gridY === gridY);
-            if (hasTower) {
-                showToast('该位置已有塔台！');
-                return;
-            }
-            
-            gameState.towers.push(new Tower(gameState.selectedTowerType, gridX, gridY));
-            gameState.gold -= config.cost;
-            showToast(`${config.name}建造成功！`);
-            gameState.selectedTowerType = null;
-            updateUI();
-        }
-        
-        // 游戏循环
-        function gameLoop() {
-            updateGame();
-            draw();
-            requestAnimationFrame(gameLoop);
-        }
-        
-        // 初始化
-        initUI();
-        updateUI();
-        gameLoop();
-        
-        // 防止页面滚动
-        document.addEventListener('touchmove', (e) => {
-            if (e.target === canvas) {
-                e.preventDefault();
-            }
-        }, { passive: false });
-    </script>
-</body>
-</html>
+                    const hpRatio = tower.hp / tower
